@@ -12,3 +12,9 @@ web-server/node_modules/*
 *.swp
 *.sublime-project
 *.sublime-workspace
+
+## node
+node_modules/
+
+## mongodb
+database
