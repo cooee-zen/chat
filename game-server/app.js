@@ -20,8 +20,8 @@ app.configure('production|development', function() {
         {
             connector : pomelo.connectors.sioconnector,
             heartbeat : 3,
-            heartbeatTimeout : 5,
-            closeTimeout: 5
+            heartbeatTimeout : 60,
+            closeTimeout: 60
         });
 });
 
