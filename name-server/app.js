@@ -157,4 +157,4 @@ function onRequest(req, res) {
 http.createServer(onRequest).listen(port);
 
 console.log("Web server has started.");
-console.log("Please log on http://127.0.0.1:3001/?uid=youruid");
+console.log("Please log on http://127.0.0.1:" + port + "/?uid=youruid");

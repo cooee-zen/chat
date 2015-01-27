@@ -14,6 +14,15 @@ app.configure('production|development', function() {
 
 	// filter configures
 	app.filter(pomelo.timeout());
+
+	// connection config
+	app.set('connectorConfig',
+        {
+            connector : pomelo.connectors.sioconnector,
+            heartbeat : 3,
+            heartbeatTimeout : 5,
+            closeTimeout: 5
+        });
 });
 
 // start app
