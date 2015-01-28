@@ -106,6 +106,10 @@ body, table {
     margin: 0.1em 0;
 }
 
+.message.observer {
+    margin: 0.1em 0.1;
+}
+
 .message td {
     vertical-align: top;
 }
@@ -113,6 +117,15 @@ body, table {
 .nick {
     font-weight: bold;
     padding: 0 1em 0 0.5em;
+}
+
+.nick.observer {
+    padding: 0 1em 0 0.5em;
+    font-size: 30pt;
+}
+
+.msg-text.observer {
+    font-size: 30pt;
 }
 
 #pop {
