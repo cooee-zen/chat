@@ -1,3 +1,5 @@
+mkdir database
+
 cd database
 start mongod --dbpath . & 
 cd ..
