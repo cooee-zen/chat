@@ -5,6 +5,8 @@ var ANIMATING = 2;
 var status = READY;
 var docs;
 
+var hostname = '120.24.59.174';
+
 function getName(index) {
 	var name = docs.all[index].name;
 	var uid = docs.all[index].uid;
@@ -23,7 +25,7 @@ function keypress(event) {
 	var key = event.keyCode || event.which || event.charCode;
 	if (status == READY) {
 		if (key == 13) {
-			$.get('http://127.0.0.1:8086/?lottery=true', function(result) {
+			$.get('http://' + hostname + ':8086/?lottery=true', function(result) {
 				console.log(result);
 				docs = JSON.parse(result);
 				startAnimate();
