@@ -12,7 +12,7 @@ var port = 8086;
 var unusedNames;
 
 function simpleResponse(res, text) {
-	res.writeHead(200, {'Content-Type': 'text/plain;charset=UTF-8', "Access-Control-Allow-Origin": "http://localhost"});
+	res.writeHead(200, {'Content-Type': 'text/plain;charset=UTF-8', "Access-Control-Allow-Origin": "*"});
 	res.write(text);
 	res.end();
 }
