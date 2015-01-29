@@ -12,7 +12,7 @@ var port = 8086;
 var unusedNames;
 
 function simpleResponse(res, text) {
-	res.writeHead(200, {'Content-Type': 'text/plain;charset=UTF-8'});
+	res.writeHead(200, {'Content-Type': 'text/plain;charset=UTF-8', "Access-Control-Allow-Origin": "http://localhost"});
 	res.write(text);
 	res.end();
 }
@@ -40,6 +40,7 @@ function getRandomName() {
 		var name = unusedNames[index].name;
 		console.log("unusedNames[index] = " + unusedNames[index]);
 		console.log("index = " + index + ", name = " + name);
+		// remove the name from unused names array.
 		unusedNames.splice(index, 1);
 		return name;
 	}
@@ -49,15 +50,21 @@ function assignName(db, uid, callback) {
 	// Get the name by uid
 	var name = getRandomName();
 
-	// Get the uids collection
-	var collection = db.collection('uids');
-	// Find uid
-	collection.insert({"uid": uid, "name": name}, {w: 1}, function(err, result) {
-		if (err) {
-			console.log("err = " + err);
-			name = "guest";
-		}
-		callback(name);
+	// Get the names collection
+	var collection = db.collection('names');
+	// Update the document with 'used: 1'.
+	collection.update({"name": name}, {$set: {"used": 1}}, function(err, result) {
+		console.log("err = " + err + ", result = " + result);
+		// Get the uids collection
+		var uidsCollection = db.collection('uids');
+		// Find uid
+		uidsCollection.insert({"uid": uid, "name": name, "lottery": 0}, {w: 1}, function(err, result) {
+			if (err) {
+				console.log("err = " + err);
+				name = "guest";
+			}
+			callback(name);
+		});
 	});
 }
 
@@ -68,7 +75,7 @@ function addNames(db, names, callback) {
 	// Convert names to json array
 	var array = [];
 	for (var i in names) {
-		array.push({"_id": i, "name": names[i]});
+		array.push({"_id": i, "name": names[i].trim(), "used": 0});
 	}
 	// Get the names collection
 	var collection = db.collection('names');
@@ -113,7 +120,7 @@ function getUnusedNames(db, next) {
 		// Get the names collection
 		var collection = db.collection('names');
 		// add names
-		collection.find({}).toArray(function(err, docs) {
+		collection.find({'used' : 0}).toArray(function(err, docs) {
 			unusedNames = docs;
 			next(db);
 		});
@@ -127,9 +134,7 @@ function onRequest(req, res) {
 	var arg = url.parse(req.url, true).query;
 	if (arg.init) {
 		initDb(res);
-	} else if (!arg.uid) {
-		simpleResponse(res, "not found parameter: uid.");
-	} else {
+	} else if (arg.uid) {
 		// Use connect method to connect to the Server
 		MongoClient.connect(mongoUrl, function(err, db) {
 			console.log("Connected correctly to server");
@@ -151,6 +156,38 @@ function onRequest(req, res) {
 				}
 			});
 		});
+	} else if (arg.lottery) {
+		// Use connect method to connect to the Server
+		MongoClient.connect(mongoUrl, function(err, db) {
+			console.log("lottery");
+			var collection = db.collection('uids');
+			collection.find({'lottery' : 0}).toArray(function(err, docs) {
+				if (docs.length == 0) {
+					db.close();
+
+					console.log('no locky man');
+					simpleResponse(res, JSON.stringify({'all': undefined, 'lucky': undefined}));
+					return;
+				}
+
+				for (var i in docs) {
+					console.log('name: ' + docs[i].name);
+				}
+
+				// choose the lucy man
+				var lucky = (Math.random() * docs.length) | 0;
+				var luckyCollection = db.collection('uids');
+				console.log('lucky man: ' + docs[lucky].name);
+				luckyCollection.update({'uid': docs[lucky].uid}, {$set: {'lottery' : 1}}, function(err, result) {
+					db.close();
+
+					// simpleResponse(res, 'lucky man: ' + docs[lucky].name);
+					simpleResponse(res, JSON.stringify({'all': docs, 'lucky': lucky}));
+				});
+			});
+		});
+	} else {
+		simpleResponse(res, "invalid parameter");
 	}
 }
 
