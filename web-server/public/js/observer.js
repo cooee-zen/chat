@@ -91,7 +91,8 @@ function check() {
 
 // show error
 function showError(error) {
-	pushMessage("系统", error);
+	// pushMessage("系统", error);
+	console.log("系统: " + error);
 }
 
 // log in with observer account
@@ -112,7 +113,8 @@ function login() {
 					showError(DUPLICATE_ERROR);
 					return;
 				}
-				pushMessage("系统", "装弹完毕。");
+				// pushMessage("系统", "装弹完毕。");
+				console.log("系统: 装弹完毕。");
 			});
 		});
 	});
@@ -169,7 +171,8 @@ $(document).ready(function() {
 			entering = false;
 			return;
 		}
-		pushMessage("系统", "与机体脱离。");
+		// pushMessage("系统", "机体脱离。");
+		console.log("系统: 机体脱离");
 	});
 });
 
@@ -182,6 +185,6 @@ function keypress(event) {
 	}
 }
 
-document.onkeypress = keypress;
+// document.onkeypress = keypress;
 
 window.setInterval(check, INTERVAL * 1000);
