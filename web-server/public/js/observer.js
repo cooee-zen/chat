@@ -2,14 +2,15 @@ var pomelo = window.pomelo;
 var username = "observer";
 var users;
 var rid = "zenparty";
-var base = 1000;
-var increase = 25;
 var reg = /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/;
 var LOGIN_ERROR = "There is no server to log in, please wait.";
 var LENGTH_ERROR = "Name/Channel is too long or too short. 20 character max.";
 var NAME_ERROR = "Bad character in Name/Channel. Can only have letters, numbers, Chinese characters, and '_'";
 var DUPLICATE_ERROR = "Please change your name to login.";
 var entering;
+var comments = [];
+var INTERVAL = 3; // seconds
+var lastSent = 0; // the timestamp of last added message.
 
 util = {
 	urlRE: /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s]*(\?\S+)?)?)?/g,
@@ -43,45 +44,54 @@ util = {
 	}
 };
 
-//always view the most recent message when it is added
-function scrollDown(base) {
-	window.scrollTo(0, base);
-};
+function pushMessage(from, text) {
+	var timestamp = (new Date()).getTime();
+	if (comments.length == 0 && timestamp - lastSent > INTERVAL * 1000) {
+		addMessage(from, text);
+	} else {
+		comments.push({
+			'from': from,
+			'text': text
+		});
+	}
+}
 
 // add message on board
-function addMessage(from, text, time) {
+function addMessage(from, text) {
 	if(text === null) return;
-	if(time == null) {
-		// if the time is null or undefined, use the current time.
-		time = new Date();
-	} else if((time instanceof Date) === false) {
-		// if it's a timestamp, interpret it
-		time = new Date(time);
-	}
-	//every message you see is actually a table with 3 cols:
-	//  the time,
+	//every message you see is actually a table with 2 cols:
 	//  the person who caused the event,
 	//  and the content
-	var messageElement = $(document.createElement("table"));
-	messageElement.addClass("message.observer");
+	var messageElement = $(document.createElement("div"));
+	messageElement.addClass("demo");
 	// sanitize
 	text = util.toStaticHTML(text);
-	var content = '<tr>' + '  <td class="nick observer">' + util.toStaticHTML(from) + ': ' + '</td>' + '  <td class="msg-text observer">' + text + '</td>' + '</tr>';
+	from = util.toStaticHTML(from);
+	var content = '<p>' + from + ': ' + text + '</p>';
 	messageElement.html(content);
 	//the log is the stream that we view
-	$("#chatHistory").append(messageElement);
-	base += increase;
-	scrollDown(base);
+	var length = $("#comments_container").children().length;
+	messageElement.hide();
+	$("#comments_container").prepend(messageElement);
+	messageElement.show('slow');
+
+	console.log("add message: " + from + ", " + text);
+	lastSent = (new Date()).getTime();
 };
 
-// show chat panel
-function showChat() {
-	scrollDown(base);
-};
+// check the comments
+function check() {
+	if (comments.length == 0) {
+		console.log("empty task");
+	} else {
+		var comment = comments.shift();
+		addMessage(comment.from, comment.text);
+	}
+}
 
 // show error
 function showError(error) {
-	addMessage("系统", error);
+	pushMessage("系统", error);
 }
 
 // log in with observer account
@@ -102,8 +112,7 @@ function login() {
 					showError(DUPLICATE_ERROR);
 					return;
 				}
-				showChat();
-				addMessage("系统", "装弹完毕。");
+				pushMessage("系统", "装弹完毕。");
 			});
 		});
 	});
@@ -140,7 +149,7 @@ $(document).ready(function() {
 
 	// wait message from the server.
 	pomelo.on('onChat', function(data) {
-		addMessage(data.from, data.msg);
+		pushMessage(data.from, data.msg);
 		$("#chatHistory").show();
 	});
 
@@ -160,6 +169,19 @@ $(document).ready(function() {
 			entering = false;
 			return;
 		}
-		addMessage("系统", "与机体脱离。");
+		pushMessage("系统", "与机体脱离。");
 	});
 });
+
+var i = 0
+function keypress(event) {
+	var key = event.keyCode || event.which || event.charCode;
+	if (key == 32) {
+		pushMessage("系统", "空格键" + i);
+		i++;
+	}
+}
+
+document.onkeypress = keypress;
+
+window.setInterval(check, INTERVAL * 1000);
