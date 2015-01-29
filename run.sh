@@ -1,7 +1,7 @@
 mkdir database
 
 cd database
-start mongod --dbpath . & 
+mongod --dbpath . & 
 cd ..
 
 cd name-server
