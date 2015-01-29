@@ -14,7 +14,10 @@ function getName(index) {
 
 	if (uid.indexOf('|') != -1 && uid.length >= 4) {
 		var length = uid.length;
-		name += '|' + uid.substring(length - 4, length);
+		var phoneNumber = uid.substring(length - 4, length);
+		if (phoneNumber != 'null') {
+			name += '|' + phoneNumber;
+		}
 	}
 	// console.log("lucky man: " + name);
 
