@@ -16,7 +16,8 @@ function getName(index) {
 		var length = uid.length;
 		var phoneNumber = uid.substring(length - 4, length);
 		if (phoneNumber != 'null') {
-			name += '|' + phoneNumber;
+			// NOTICE: Do not show the phone number.
+			// name += '|' + phoneNumber;
 		}
 	}
 	// console.log("lucky man: " + name);
