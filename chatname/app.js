@@ -12,7 +12,13 @@ fs.readFile('in.txt', 'utf-8', function(err, data) {
 		for (var i in splits) {
 			splits[i] = splits[i].trim();
 			if (splits[i] != '') {
-				out.push(splits[i]);
+				var existed = false;
+				for (var j in out) {
+					if (out[j] == splits[i])
+						existed = true;
+				}
+				if (existed == false)
+					out.push(splits[i]);
 			}
 		}
 
